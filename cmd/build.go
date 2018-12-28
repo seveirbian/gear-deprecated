@@ -1,9 +1,11 @@
 package cmd
 
 import (
+    "fmt"
     "github.com/spf13/cobra"
     "github.com/seveirbian/gear/build"
     "github.com/seveirbian/gear/pkg/image"
+    // "github.com/seveirbian/gear/pkg/gear"
 )
 
 var dockerImage string
@@ -19,8 +21,13 @@ var buildCmd = &cobra.Command{
     Long:  `build a gear image from a standard docker image`,
     Run: func(cmd *cobra.Command, args []string) {
         image := image.Parse(dockerImage)
+
         gearImageBuilder := build.InitBuilder(image)
 
-        gearImageBuilder.Build()
+        if gearImageBuilder.HasParsedThisImage() {
+            fmt.Println("This image has been built.")
+        }else {
+            gearImageBuilder.Build()
+        }
     },
 }

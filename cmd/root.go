@@ -30,7 +30,7 @@ func init() {
         case "warn": logrus.SetLevel(logrus.WarnLevel)
         case "error": logrus.SetLevel(logrus.ErrorLevel)
         case "fatal": logrus.SetLevel(logrus.FatalLevel)
-    } 
+    }
 }
 
 func Execute() {
