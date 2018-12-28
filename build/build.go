@@ -27,7 +27,7 @@ type Builder struct {
 func InitBuilder(image types.Image) *Builder {
     // create client to interact with docker daemon
     ctx := context.Background()
-    cli, err := client.NewClientWithOpts(client.WithVersion("1.39"))
+    cli, err := client.NewClientWithOpts(client.WithVersion("1.38"))
     if err != nil {
         logrus.WithFields(logrus.Fields{
             "err": err,
