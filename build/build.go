@@ -89,8 +89,8 @@ func (b *Builder) HasParsedThisImage() bool{
 // This Func is used to walk through the lowerdirs, calculate regular files' hash 
 // and copy irregular file to parsedImages path
 func (b *Builder) WalkThroughLayers(LayerDirs []string) {
-    var regularFiles map[string]string
-    var irregularFiles []string
+    var regularFiles = map[string]string{}
+    var irregularFiles = []string{}
 
     // 1. get all files of this image
     for _, path := range LayerDirs {
@@ -115,7 +115,7 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                                 "err": err,
                                 }).Fatal("Fail to copy file: "+path)
                     }
-                    regularFiles[string(h.Sum(nil))] = path
+                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
                 }else {
                     // record the irregular files
                     irregularFiles = append(irregularFiles, path)
