@@ -204,7 +204,7 @@ func (b * Builder) InitDockerfile() {
 
     exposedPorts := b.DockerImageInfo.Config.ExposedPorts
     for key, value := range exposedPorts {
-        b.Dockerfile.EXPOSE[key] = value
+        b.Dockerfile.EXPOSE[string(key)] = value
     }
 
     entryPoints := b.DockerImageInfo.Config.Entrypoint
@@ -216,7 +216,7 @@ func (b * Builder) InitDockerfile() {
     b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
 
     cmds := b.DockerImageInfo.Config.Cmd
-    for _, value = range cmds {
+    for _, value := range cmds {
         b.Dockerfile.CMD = append(b.Dockerfile.CMD, string(value))
     }
 
