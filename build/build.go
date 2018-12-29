@@ -202,6 +202,7 @@ func (b * Builder) InitDockerfile() {
     b.Dockerfile.ENV = b.DockerImageInfo.Config.Env
     b.Dockerfile.LABELS = b.DockerImageInfo.Config.Labels
 
+    b.Dockerfile.EXPOSE = map[string]struct{}{}
     exposedPorts := b.DockerImageInfo.Config.ExposedPorts
     for key, value := range exposedPorts {
         b.Dockerfile.EXPOSE[string(key)] = value
