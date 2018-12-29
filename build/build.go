@@ -201,16 +201,26 @@ func (b * Builder) InitDockerfile() {
     b.Dockerfile.FROM = "scratch"
     b.Dockerfile.ENV = b.DockerImageInfo.Config.Env
     b.Dockerfile.LABELS = b.DockerImageInfo.Config.Labels
+
     exposedPorts := b.DockerImageInfo.Config.ExposedPorts
     for key, value := range exposedPorts {
-        fmt.Println(string(key))
-        fmt.Println(value)
+        b.Dockerfile.EXPOSE[key] = value
     }
-    // b.Dockerfile.EXPOSE = b.DockerImageInfo.Config.ExposedPorts
-    // b.Dockerfile.ENTRYPOINT = b.DockerImageInfo.Config.Entrypoint
-    // b.Dockerfile.VOLUME = b.DockerImageInfo.Config.Volumes
-    // b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
-    // b.Dockerfile.CMD = b.DockerImageInfo.Config.Cmd
+
+    entryPoints := b.DockerImageInfo.Config.Entrypoint
+    for _, value := range entryPoints {
+        b.Dockerfile.ENTRYPOINT = append(b.Dockerfile.ENTRYPOINT, string(value))
+    }
+
+    b.Dockerfile.VOLUME = b.DockerImageInfo.Config.Volumes
+    b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
+
+    cmds := b.DockerImageInfo.Config.Cmd
+    for _, value = range cmds {
+        b.Dockerfile.CMD = append(b.Dockerfile.CMD, string(value))
+    }
+
+    fmt.Println(b.Dockerfile)
 }
 
 
