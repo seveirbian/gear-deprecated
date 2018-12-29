@@ -6,6 +6,7 @@ import (
     "io"
     "path/filepath"
     "crypto/sha256"
+    "encoding/json"
     "strings"
     "golang.org/x/net/context"
 
@@ -26,9 +27,12 @@ type Builder struct {
     Client *client.Client
 
     GearRootPath string
+    TmpDir string
 
     RegularFiles map[string]string
     IrregularFiles []string
+
+    Dockerfile types.Dockerfile
 }
 
 func InitBuilder(image types.Image) *Builder {
@@ -49,12 +53,22 @@ func InitBuilder(image types.Image) *Builder {
             }).Warn("Fail to inspect the image")
     }
 
+    // 3. create tmp dir and others
+    tmpDir := filepath.Join(gear.GearRootPath, "tmp")
+    err = os.MkdirAll(tmpDir, os.ModePerm)
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                    "err": err,
+                    }).Fatal("Fail to create tmpDir:/home/.gears/tmp.")
+        }
+
     return &Builder { 
         DockerImage: image, 
         Ctx: ctx, 
         Client: cli, 
         DockerImageInfo: imageInspect, 
-        GearRootPath: gear.GearRootPath,  
+        GearRootPath: gear.GearRootPath, 
+        TmpDir: tmpDir, 
     }
 }
 
@@ -72,6 +86,17 @@ func (b *Builder) Build() {
 
     // 2. walk through these lowerdirs, hash regular files and record irregular files
     b.WalkThroughLayers(layers_path)
+
+    // 3. create gear.json
+    b.InitGearJSON()
+
+    // 4. create Dockerfile
+    b.InitDockerfile()
+
+    // 5. create the gear image
+
+    // 6. destroy tmp files
+    b.Destroy()
 
 }
 
@@ -129,13 +154,59 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
         }
     }
     
+    // 3. assign regularFiles and irregularFiles to builder
     b.RegularFiles = regularFiles
     b.IrregularFiles = irregularFiles
-    fmt.Println(regularFiles)
-    fmt.Println(irregularFiles)
 }
 
+func (b *Builder) InitGearJSON() {
+    // 1. encode regularfiles map[string]string
+    json, err := json.Marshal(b.RegularFiles)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to encode regularfiles struct...")
+    }
 
+    // 2. create the gear.json file
+    f, err := os.Create(filepath.Join(b.TmpDir, "gear.json"))
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to create gear.json...")
+    }
+
+    // 3. write to gear.json
+    _, err = f.Write(json)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to write gear.json...")
+    }
+}
+
+func (b *Builder) Destroy() {
+    // 1. unmount overlay
+
+    // 2. remove tmp dir
+    err := os.RemoveAll(b.TmpDir)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to remove tmp dir...")
+    }
+}
+
+func (b * Builder) InitDockerfile() {
+    b.Dockerfile.FROM = "scratch"
+    b.Dockerfile.ENV = b.DockerImageInfo.Config.Env
+    b.Dockerfile.LABELS = b.DockerImageInfo.Config.Labels
+    b.Dockerfile.EXPOSE = b.DockerImageInfo.Config.ExposedPorts
+    b.Dockerfile.ENTRYPOINT = b.DockerImageInfo.Config.Entrypoint
+    b.Dockerfile.VOLUME = b.DockerImageInfo.Config.Volumes
+    b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
+    b.Dockerfile.CMD = b.DockerImageInfo.Config.Cmd
+}
 
 
 

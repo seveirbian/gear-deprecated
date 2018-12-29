@@ -6,8 +6,8 @@ import (
     "github.com/sirupsen/logrus"
 )
 
-var GearRootPath = os.Getenv("HOME") + "/.gear/"
-var GearParsedImagesPath = os.Getenv("HOME") + "/.gear/parsedImages/"
+var GearRootPath = filepath.Join(os.Getenv("HOME"), ".gear")
+// var GearParsedImagesPath = filepath.Join(os.Getenv("HOME"), ".gear", "parsedImages")
 
 
 func Init() {
@@ -21,19 +21,15 @@ func Init() {
                     }).Fatal("Fail to create GearRootPath:/home/.gears/.")
         }
     }
-    logrus.WithFields(logrus.Fields{
-            }).Info("Created GearRootPath:/home/.gears/.")
 
-    // create ParsedImagesPath
-    _, err = os.Stat(GearParsedImagesPath)
-    if err != nil {
-        err = os.MkdirAll(GearParsedImagesPath, os.ModePerm)
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                    "err": err,
-                    }).Fatal("Fail to create GearparsedImagesPath:/home/.gears/parsedImages/.")
-        }
-    }
-    logrus.WithFields(logrus.Fields{
-            }).Info("Created GearparsedImagesPath:/home/.gears/parsedImages/.")
+    // // create ParsedImagesPath
+    // _, err = os.Stat(GearParsedImagesPath)
+    // if err != nil {
+    //     err = os.MkdirAll(GearParsedImagesPath, os.ModePerm)
+    //     if err != nil {
+    //         logrus.WithFields(logrus.Fields{
+    //                 "err": err,
+    //                 }).Fatal("Fail to create GearparsedImagesPath:/home/.gears/parsedImages/.")
+    //     }
+    // }
 }
