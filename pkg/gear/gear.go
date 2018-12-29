@@ -2,7 +2,8 @@ package gear
 
 import (
     "os"
-
+    "path/filepath"
+    
     "github.com/sirupsen/logrus"
 )
 
