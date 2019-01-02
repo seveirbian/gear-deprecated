@@ -392,6 +392,7 @@ func (b *Builder) BuildGearImage() {
     archive.Archive(files, DockerfileTar)
 
     // 2. open tar
+    fmt.Println(DockerfileTar)
     buildTar, err := os.Open(DockerfileTar)
     if err != nil {
         logrus.WithFields(logrus.Fields{
@@ -403,7 +404,7 @@ func (b *Builder) BuildGearImage() {
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
         Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
-        Dockerfile: "Dockerfile", 
+        Dockerfile: filepath.Join(b.TmpDir, "Dockerfile"), 
     }
 
     // 4. start to build
