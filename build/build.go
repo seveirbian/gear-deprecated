@@ -405,7 +405,7 @@ func (b *Builder) BuildGearImage() {
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
-        Tags: []string{b.DockerImage.Name+"gear:"+b.DockerImage.Tag}
+        Tags: []string{b.DockerImage.Name+"gear:"+b.DockerImage.Tag}, 
         Dockerfile: "Dockerfile", 
     }
 
