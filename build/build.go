@@ -405,6 +405,7 @@ func (b *Builder) BuildGearImage() {
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
+        Tags: []string{b.DockerImage.Name+"gear:"+b.DockerImage.Tag}
         Dockerfile: "Dockerfile", 
     }
 
@@ -417,7 +418,7 @@ func (b *Builder) BuildGearImage() {
     }
     defer buildResp.Body.Close()
 
-    fmt.Println(buildResp)
+    fmt.Println(buildResp.Body)
 }
 
 
