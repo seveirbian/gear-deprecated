@@ -90,16 +90,16 @@ func (b *Builder) Build() {
     }
 
     // 2. walk through these lowerdirs, hash regular files and record irregular files
-    logrus.Info("Collecting file information...")
-    b.WalkThroughLayers(layers_path)
+    // logrus.Info("Collecting file information...")
+    // b.WalkThroughLayers(layers_path)
 
-    // 3. create gear.json
-    logrus.Info("Creating gear.json...")
-    b.InitGearJSON()
+    // // 3. create gear.json
+    // logrus.Info("Creating gear.json...")
+    // b.InitGearJSON()
 
-    // 4. create Dockerfile
-    logrus.Info("Generating dockerfile...")
-    b.InitDockerfile()
+    // // 4. create Dockerfile
+    // logrus.Info("Generating dockerfile...")
+    // b.InitDockerfile()
 
     // 5. create the gear image
     logrus.Info("Creating new gear image...")
@@ -288,10 +288,10 @@ func (b *Builder) InitDockerfile() {
     // tar irregular file to a .tar file and move it to TmpDir
     if b.needTarIrregularFiles() {
         dockerfile = dockerfile + "ADD "
-        dockerfile = dockerfile + "/tmp.tar /"
+        dockerfile = dockerfile + "./tmp.tar /"
         dockerfile = dockerfile + "\n"
         dockerfile = dockerfile + "COPY "
-        dockerfile = dockerfile + "/gear.json /"
+        dockerfile = dockerfile + "./gear.json /"
         dockerfile = dockerfile + "\n"
     }
     
