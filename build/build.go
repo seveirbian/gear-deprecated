@@ -288,10 +288,10 @@ func (b *Builder) InitDockerfile() {
     // tar irregular file to a .tar file and move it to TmpDir
     if b.needTarIrregularFiles() {
         dockerfile = dockerfile + "ADD "
-        dockerfile = dockerfile + "./tmp.tar /"
+        dockerfile = dockerfile + "/tmp.tar /"
         dockerfile = dockerfile + "\n"
         dockerfile = dockerfile + "COPY "
-        dockerfile = dockerfile + "./gear.json /"
+        dockerfile = dockerfile + "/gear.json /"
         dockerfile = dockerfile + "\n"
     }
     
