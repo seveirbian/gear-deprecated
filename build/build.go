@@ -355,21 +355,21 @@ func (b *Builder) TarIrregularFiles() {
                 "err": err,
                 }).Fatal("Fail to write file header...")
         }
-        // open the file
-        f, err := os.Open(irFile)
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                "err": err,
-                }).Fatal("Fail to open file...")
-        }
-        defer f.Close()
-        // write the file. to tarball
-        _, err = io.Copy(tw, f)
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                "err": err,
-                }).Fatal("Fail to write to tar file...")
-        }
+        // // open the file
+        // f, err := os.Open(irFile)
+        // if err != nil {
+        //     logrus.WithFields(logrus.Fields{
+        //         "err": err,
+        //         }).Fatal("Fail to open file...")
+        // }
+        // defer f.Close()
+        // // write the file. to tarball
+        // _, err = io.Copy(tw, f)
+        // if err != nil {
+        //     logrus.WithFields(logrus.Fields{
+        //         "err": err,
+        //         }).Fatal("Fail to write to tar file...")
+        // }
     } 
 }
 
