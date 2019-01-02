@@ -151,7 +151,7 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                     regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
                 }else {
                     // record the irregular files
-                    irregularFiles[path] = irregularFiles
+                    irregularFiles[path] = f
                     // irregularFiles = append(irregularFiles, path)
                 }
                 return nil
