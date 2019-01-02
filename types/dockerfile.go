@@ -9,7 +9,7 @@ type Dockerfile struct {
     FROM string
     ENV []string
     RUN []string
-    LABELS map[string]string
+    LABEL map[string]string
     EXPOSE map[string]struct{}   // "80/tcp":{}
     ENTRYPOINT []string
     VOLUME map[string]struct{}

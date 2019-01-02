@@ -4,6 +4,8 @@ import (
     "fmt"
     "os"
     "io"
+    "bytes"
+    "archive/tar"
     "path/filepath"
     "crypto/sha256"
     "encoding/json"
@@ -26,8 +28,9 @@ type Builder struct {
     Ctx context.Context
     Client *client.Client
 
-    GearRootPath string
-    TmpDir string
+    GearRootPath string       // $HOME/.gear/
+    TmpDir string             // $HOME/.gear/tmp/
+    // TmpTarPath string         // $HOME/.gear/tmp/tmp.tar
 
     RegularFiles map[string]string
     IrregularFiles []string
@@ -76,6 +79,7 @@ func (b *Builder) Build() {
     fmt.Println("Start building...")
 
     // 1. get all layers path of this image
+    logrus.Info("Inspecting this image...")
     var layers_path []string
     if b.DockerImageInfo.GraphDriver.Data["LowerDir"] == ""{
         layers_path = append(layers_path, b.DockerImageInfo.GraphDriver.Data["UpperDir"])
@@ -85,18 +89,23 @@ func (b *Builder) Build() {
     }
 
     // 2. walk through these lowerdirs, hash regular files and record irregular files
+    logrus.Info("Collecting file information of this image...")
     b.WalkThroughLayers(layers_path)
 
     // 3. create gear.json
+    logrus.Info("Creating gear.json...")
     b.InitGearJSON()
 
     // 4. create Dockerfile
+    logrus.Info("Generating dockerfile...")
     b.InitDockerfile()
 
     // 5. create the gear image
+    logrus.Info("Creating new gear image...")
 
     // 6. destroy tmp files
-    b.Destroy()
+    logrus.Info("Cleaning...")
+    // b.Destroy()
 
 }
 
@@ -119,7 +128,6 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 
     // 1. get all files of this image
     for _, path := range LayerDirs {
-        fmt.Println(path)
         err := filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
                 if (f == nil) {return err}
                 if f.IsDir() {return nil}
@@ -175,6 +183,7 @@ func (b *Builder) InitGearJSON() {
                 "err": err,
                 }).Fatal("Fail to create gear.json...")
     }
+    defer f.Close()
 
     // 3. write to gear.json
     _, err = f.Write(json)
@@ -197,10 +206,13 @@ func (b *Builder) Destroy() {
     }
 }
 
-func (b * Builder) InitDockerfile() {
+func (b *Builder) InitDockerfile() {
+    // 1. fill b.Dockerfile struct
     b.Dockerfile.FROM = "scratch"
     b.Dockerfile.ENV = b.DockerImageInfo.Config.Env
-    b.Dockerfile.LABELS = b.DockerImageInfo.Config.Labels
+    b.Dockerfile.LABEL = b.DockerImageInfo.Config.Labels
+    b.Dockerfile.VOLUME = b.DockerImageInfo.Config.Volumes
+    b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
 
     b.Dockerfile.EXPOSE = map[string]struct{}{}
     exposedPorts := b.DockerImageInfo.Config.ExposedPorts
@@ -213,17 +225,153 @@ func (b * Builder) InitDockerfile() {
         b.Dockerfile.ENTRYPOINT = append(b.Dockerfile.ENTRYPOINT, string(value))
     }
 
-    b.Dockerfile.VOLUME = b.DockerImageInfo.Config.Volumes
-    b.Dockerfile.WORKDIR = b.DockerImageInfo.Config.WorkingDir
-
     cmds := b.DockerImageInfo.Config.Cmd
     for _, value := range cmds {
         b.Dockerfile.CMD = append(b.Dockerfile.CMD, string(value))
     }
 
-    fmt.Println(b.Dockerfile)
+    // 2. transform b.Dockerfile to []byte
+    var dokerfile = []byte
+
+    dockerfile = append(dockerfile, []byte("FROM "))
+    dockerfile = append(dockerfile, []byte(b.Dockerfile.FROM))
+    dockerfile = append(dockerfile, []byte("\n"))
+
+    for _, env := range b.Dockerfile.ENV {
+        dockerfile = append(dockerfile, []byte("ENV "))
+        dockerfile = append(dockerfile, []byte(env))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+
+    // Label is a tag to record some thing about this image, useless
+    // for key, value := range b.Dockerfile.LABEL {
+    //     dockerfile = append(dockerfile, []byte("LABEL "))
+    //     dockerfile = append(dockerfile, []byte(env))
+    //     dockerfile = append(dockerfile, []byte("\n"))
+    // }
+
+    for key, _ := range b.Dockerfile.VOLUME {
+        dockerfile = append(dockerfile, []byte("VOLUME "))
+        dockerfile = append(dockerfile, []byte(key))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+
+    dockerfile = append(dockerfile, []byte("WORKDIR "))
+    dockerfile = append(dockerfile, []byte(b.Dockerfile.WORKDIR))
+    dockerfile = append(dockerfile, []byte("\n"))
+
+    for key, _ := range b.Dockerfile.EXPOSE {
+        dockerfile = append(dockerfile, []byte("EXPOSE "))
+        dockerfile = append(dockerfile, []byte(key))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+
+    for _, entry := range b.Dockerfile.ENTRYPOINT {
+        dockerfile = append(dockerfile, []byte("ENTRYPOINT "))
+        dockerfile = append(dockerfile, []byte(entry))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+
+    // tar irregular file to a .tar file and move it to TmpDir
+    if b.needTarIrregularFiles() {
+        dockerfile = append(dockerfile, []byte("ADD "))
+        dockerfile = append(dockerfile, []byte("./tmp.tar /"))
+        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = append(dockerfile, []byte("COPY "))
+        dockerfile = append(dockerfile, []byte("./gear.json /"))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+    
+
+    for _, cmd := range b.Dockerfile.CMD {
+        dockerfile = append(dockerfile, []byte("CMD "))
+        dockerfile = append(dockerfile, []byte(cmd))
+        dockerfile = append(dockerfile, []byte("\n"))
+    }
+
+    // 3. create Dockerfile
+    f, err := os.Create(filepath.Join(b.TmpDir, "Dockerfile"))
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to create Dockerfile...")
+    }
+    defer f.Close()
+
+    // 4. write to Dockerfile
+    _, err := f.Write(dockerfile)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to write Dockerfile...")
+    }
 }
 
+func (b *Builder) needTarIrregularFiles() {
+    // test whether need a tarFile
+    if len(b.IrregularFiles) == 0 {
+        return false
+    }
+    
+    b.needTarIrregularFiles()
+
+    return true
+}
+
+func (b *Builder) needTarIrregularFiles() {
+    // 1. create a file, which will store the tar data
+    tarFile, err := os.Create(filepath.Join(b.TmpDir, "tmp.tar"))
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to create tmp.tar...")
+    }
+    defer tarFile.Close()
+
+    // 2. create a tar writer on tarFile
+    tw := tar.NewWriter(tarFile)
+    defer tw.Close()
+
+    // 3. write each file to tar
+    for _, irFile := range b.irregularFiles {
+        // get irfile info
+        fInfo, err := os.Stat(irFile)
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to stat file...")
+        }
+        // get file header info
+        hd, err := tar.FileInfoHeader(fInfo, "")
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to get file header...")
+        }
+        // write file header info
+        err = tw.WriteHeader(hd)
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to write file header...")
+        }
+        // open the file
+        f, err := os.Open(irFile)
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to open file...")
+        }
+        defer f.Close()
+        // write the file. to tarball
+        _, err = io.Copy(tw, f)
+        if err != nil {
+            logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to write to tar file...")
+        }
+    } 
+}
 
 
 
