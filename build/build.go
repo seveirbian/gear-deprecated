@@ -404,7 +404,6 @@ func (b *Builder) BuildGearImage() {
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
         Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
-        Dockerfile: filepath.Join(b.TmpDir, "Dockerfile"), 
     }
 
     // 4. start to build
