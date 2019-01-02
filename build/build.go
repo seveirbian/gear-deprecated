@@ -124,7 +124,7 @@ func (b *Builder) HasParsedThisImage() bool{
 // and copy irregular file to parsedImages path
 func (b *Builder) WalkThroughLayers(LayerDirs []string) {
     var regularFiles = map[string]string{}
-    var irregularFiles = [string]os.FileInfo{}
+    var irregularFiles = map[string]os.FileInfo{}
 
     // 1. get all files of this image
     for _, path := range LayerDirs {
