@@ -148,7 +148,13 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                                 "err": err,
                                 }).Fatal("Fail to copy file: "+path)
                     }
-                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
+
+                    pathSlice := strings.Split(path, "diff/")
+                    var finalPath string
+                    for i := 1; i < len(pathSlice); i++ {
+                        finalPath += pathSlice
+                    }
+                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = finalPath
                 }else {
                     // record the irregular files
                     irregularFiles[path] = f
@@ -354,6 +360,8 @@ func (b *Builder) TarIrregularFiles() {
                 "err": err,
                 }).Fatal("Fail to get file header...")
         }
+        // modify hd's name
+        hd.Name = irFilePath
         // write file header info
         err = tw.WriteHeader(hd)
         if err != nil {
@@ -361,21 +369,6 @@ func (b *Builder) TarIrregularFiles() {
                 "err": err,
                 }).Fatal("Fail to write file header...")
         }
-        // // open the file
-        // f, err := os.Open(irFile)
-        // if err != nil {
-        //     logrus.WithFields(logrus.Fields{
-        //         "err": err,
-        //         }).Fatal("Fail to open file...")
-        // }
-        // defer f.Close()
-        // // write the file. to tarball
-        // _, err = io.Copy(tw, f)
-        // if err != nil {
-        //     logrus.WithFields(logrus.Fields{
-        //         "err": err,
-        //         }).Fatal("Fail to write to tar file...")
-        // }
     } 
 }
 
