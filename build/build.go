@@ -257,9 +257,11 @@ func (b *Builder) InitDockerfile() {
         dockerfile = dockerfile + "\n"
     }
 
-    dockerfile = dockerfile + "WORKDIR "
-    dockerfile = dockerfile + b.Dockerfile.WORKDIR
-    dockerfile = dockerfile + "\n"
+    if b.Dockerfile.WORKDIR != "" {
+        dockerfile = dockerfile + "WORKDIR "
+        dockerfile = dockerfile + b.Dockerfile.WORKDIR
+        dockerfile = dockerfile + "\n"
+    }
 
     for key, _ := range b.Dockerfile.EXPOSE {
         dockerfile = dockerfile + "EXPOSE "
