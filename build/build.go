@@ -4,7 +4,7 @@ import (
     "fmt"
     "os"
     "io"
-    "bytes"
+    // "bytes"
     "archive/tar"
     "path/filepath"
     "crypto/sha256"
@@ -231,62 +231,62 @@ func (b *Builder) InitDockerfile() {
     }
 
     // 2. transform b.Dockerfile to []byte
-    var dokerfile = []byte
+    var dockerfile string
 
-    dockerfile = append(dockerfile, []byte("FROM "))
-    dockerfile = append(dockerfile, []byte(b.Dockerfile.FROM))
-    dockerfile = append(dockerfile, []byte("\n"))
+    dockerfile = dockerfile + "FROM "
+    dockerfile = dockerfile + b.Dockerfile.FROM
+    dockerfile = dockerfile + "\n"
 
     for _, env := range b.Dockerfile.ENV {
-        dockerfile = append(dockerfile, []byte("ENV "))
-        dockerfile = append(dockerfile, []byte(env))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "ENV "
+        dockerfile = dockerfile + env
+        dockerfile = dockerfile + "\n"
     }
 
     // Label is a tag to record some thing about this image, useless
     // for key, value := range b.Dockerfile.LABEL {
-    //     dockerfile = append(dockerfile, []byte("LABEL "))
-    //     dockerfile = append(dockerfile, []byte(env))
-    //     dockerfile = append(dockerfile, []byte("\n"))
+    //     dockerfile = dockerfile + "LABEL "
+    //     dockerfile = dockerfile + env
+    //     dockerfile = dockerfile + "\n"
     // }
 
     for key, _ := range b.Dockerfile.VOLUME {
-        dockerfile = append(dockerfile, []byte("VOLUME "))
-        dockerfile = append(dockerfile, []byte(key))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "VOLUME "
+        dockerfile = dockerfile + key
+        dockerfile = dockerfile + "\n"
     }
 
-    dockerfile = append(dockerfile, []byte("WORKDIR "))
-    dockerfile = append(dockerfile, []byte(b.Dockerfile.WORKDIR))
-    dockerfile = append(dockerfile, []byte("\n"))
+    dockerfile = dockerfile + "WORKDIR "
+    dockerfile = dockerfile + b.Dockerfile.WORKDIR
+    dockerfile = dockerfile + "\n"
 
     for key, _ := range b.Dockerfile.EXPOSE {
-        dockerfile = append(dockerfile, []byte("EXPOSE "))
-        dockerfile = append(dockerfile, []byte(key))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "EXPOSE "
+        dockerfile = dockerfile + key
+        dockerfile = dockerfile + "\n"
     }
 
     for _, entry := range b.Dockerfile.ENTRYPOINT {
-        dockerfile = append(dockerfile, []byte("ENTRYPOINT "))
-        dockerfile = append(dockerfile, []byte(entry))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "ENTRYPOINT "
+        dockerfile = dockerfile + entry
+        dockerfile = dockerfile + "\n"
     }
 
     // tar irregular file to a .tar file and move it to TmpDir
     if b.needTarIrregularFiles() {
-        dockerfile = append(dockerfile, []byte("ADD "))
-        dockerfile = append(dockerfile, []byte("./tmp.tar /"))
-        dockerfile = append(dockerfile, []byte("\n"))
-        dockerfile = append(dockerfile, []byte("COPY "))
-        dockerfile = append(dockerfile, []byte("./gear.json /"))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "ADD "
+        dockerfile = dockerfile + "./tmp.tar /"
+        dockerfile = dockerfile + "\n"
+        dockerfile = dockerfile + "COPY "
+        dockerfile = dockerfile + "./gear.json /"
+        dockerfile = dockerfile + "\n"
     }
     
 
     for _, cmd := range b.Dockerfile.CMD {
-        dockerfile = append(dockerfile, []byte("CMD "))
-        dockerfile = append(dockerfile, []byte(cmd))
-        dockerfile = append(dockerfile, []byte("\n"))
+        dockerfile = dockerfile + "CMD "
+        dockerfile = dockerfile + cmd
+        dockerfile = dockerfile + "\n"
     }
 
     // 3. create Dockerfile
@@ -299,7 +299,7 @@ func (b *Builder) InitDockerfile() {
     defer f.Close()
 
     // 4. write to Dockerfile
-    _, err := f.Write(dockerfile)
+    _, err = f.Write([]byte(dockerfile))
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
@@ -307,18 +307,18 @@ func (b *Builder) InitDockerfile() {
     }
 }
 
-func (b *Builder) needTarIrregularFiles() {
+func (b *Builder) needTarIrregularFiles() bool {
     // test whether need a tarFile
     if len(b.IrregularFiles) == 0 {
         return false
     }
     
-    b.needTarIrregularFiles()
+    b.TarIrregularFiles()
 
     return true
 }
 
-func (b *Builder) needTarIrregularFiles() {
+func (b *Builder) TarIrregularFiles() {
     // 1. create a file, which will store the tar data
     tarFile, err := os.Create(filepath.Join(b.TmpDir, "tmp.tar"))
     if err != nil {
@@ -333,7 +333,7 @@ func (b *Builder) needTarIrregularFiles() {
     defer tw.Close()
 
     // 3. write each file to tar
-    for _, irFile := range b.irregularFiles {
+    for _, irFile := range b.IrregularFiles {
         // get irfile info
         fInfo, err := os.Stat(irFile)
         if err != nil {
