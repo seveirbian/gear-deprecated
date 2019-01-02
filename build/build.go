@@ -336,9 +336,19 @@ func (b *Builder) TarIrregularFiles() {
     defer tw.Close()
 
     // 3. write each file to tar
-    for _, irFileInfo := range b.IrregularFiles {
+    for irFilePath, irFileInfo := range b.IrregularFiles {
+        mode := irFileInfo.Mode()
+        var target string
+        if mode & os.ModeSymlink != 0 {
+            target, err = os.Readlink(irFilePath)
+            if err != nil {
+                logrus.WithFields(logrus.Fields{
+                    "err": err,
+                    }).Fatal("Fail to get symlink's target...")
+            }
+        }
         // get file header info
-        hd, err := tar.FileInfoHeader(irFileInfo, "")
+        hd, err := tar.FileInfoHeader(irFileInfo, target)
         if err != nil {
             logrus.WithFields(logrus.Fields{
                 "err": err,
