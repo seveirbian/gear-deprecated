@@ -107,7 +107,7 @@ func (b *Builder) Build() {
 
     // 6. destroy tmp files
     logrus.Info("Cleaning...")
-    b.Destroy()
+    // b.Destroy()
 
 }
 
@@ -208,9 +208,7 @@ func (b *Builder) InitGearJSON() {
 }
 
 func (b *Builder) Destroy() {
-    // 1. unmount overlay
-
-    // 2. remove tmp dir
+    // 1. remove tmp dir
     err := os.RemoveAll(b.TmpDir)
     if err != nil {
         logrus.WithFields(logrus.Fields{
@@ -393,7 +391,6 @@ func (b *Builder) BuildGearImage() {
     var DockerfileTar = filepath.Join(b.TmpDir, "Dockerfile.tar")
     archive.Archive(files, DockerfileTar)
 
-
     // 2. open tar
     buildTar, err := os.Open(DockerfileTar)
     if err != nil {
@@ -405,7 +402,7 @@ func (b *Builder) BuildGearImage() {
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
-        Tags: []string{b.DockerImage.Name+"gear:"+b.DockerImage.Tag}, 
+        Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
         Dockerfile: "Dockerfile", 
     }
 
