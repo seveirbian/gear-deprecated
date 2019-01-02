@@ -14,6 +14,7 @@ import (
 
     "github.com/seveirbian/gear/types"
     "github.com/seveirbian/gear/pkg/gear"
+    "github.com/seveirbian/gear/pkg/archive"
     "github.com/sirupsen/logrus"
 
     "github.com/docker/docker/client"
@@ -89,7 +90,7 @@ func (b *Builder) Build() {
     }
 
     // 2. walk through these lowerdirs, hash regular files and record irregular files
-    logrus.Info("Collecting file information of this image...")
+    logrus.Info("Collecting file information...")
     b.WalkThroughLayers(layers_path)
 
     // 3. create gear.json
@@ -102,10 +103,11 @@ func (b *Builder) Build() {
 
     // 5. create the gear image
     logrus.Info("Creating new gear image...")
+    b.BuildGearImage()
 
     // 6. destroy tmp files
     logrus.Info("Cleaning...")
-    // b.Destroy()
+    b.Destroy()
 
 }
 
@@ -378,10 +380,45 @@ func (b *Builder) TarIrregularFiles() {
                 "err": err,
                 }).Fatal("Fail to write file header...")
         }
-    } 
+    }
 }
 
+func (b *Builder) BuildGearImage() {
+    // 1. create a tarball which contains everthing including Dockerfile
+    var files = []string {
+        filepath.Join(b.TmpDir, "tmp.tar"), 
+        filepath.Join(b.TmpDir, "gear.json"), 
+        filepath.Join(b.TmpDir, "Dockerfile"), 
+    }
+    var DockerfileTar = filepath.Join(b.TmpDir, "Dockerfile.tar")
+    archive.Archive(files, DockerfileTar)
 
+
+    // 2. open tar
+    buildTar, err := os.Open(DockerfileTar)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to open Dockerfile.tar...")
+    }
+    defer buildTar.Close()
+
+    // 3. init image build options
+    opts := dtypes.ImageBuildOptions{
+        Dockerfile: "Dockerfile", 
+    }
+
+    // 4. start to build
+    buildResp, err := b.Client.ImageBuild(b.Ctx, buildTar, opts)
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to build gear image...")
+    }
+    defer buildResp.Body.Close()
+
+    fmt.Println(buildResp)
+}
 
 
 
