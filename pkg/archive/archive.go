@@ -42,6 +42,7 @@ func Archive(files []string, archivePath string) {
                     "err": err,
                     }).Fatal("Fail to get file header...")
             }
+            hd.Name = file
             // write file header info
             err = tw.WriteHeader(hd)
             if err != nil {
@@ -80,6 +81,7 @@ func Archive(files []string, archivePath string) {
                     "err": err,
                     }).Fatal("Fail to get file header...")
             }
+            hd.Name = file
             // write file header info
             err = tw.WriteHeader(hd)
             if err != nil {
@@ -98,6 +100,7 @@ func Archive(files []string, archivePath string) {
                     "err": err,
                     }).Fatal("Fail to get file header...")
             }
+            hd.Name = file
             // write file header info
             err = tw.WriteHeader(hd)
             if err != nil {
