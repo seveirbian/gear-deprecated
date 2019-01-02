@@ -149,16 +149,10 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                                 }).Fatal("Fail to copy file: "+path)
                     }
 
-                    pathSlice := strings.Split(path, "diff/")
-                    var finalPath string
-                    for i := 1; i < len(pathSlice); i++ {
-                        finalPath += pathSlice
-                    }
-                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = finalPath
+                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
                 }else {
                     // record the irregular files
                     irregularFiles[path] = f
-                    // irregularFiles = append(irregularFiles, path)
                 }
                 return nil
         })
@@ -175,6 +169,16 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 }
 
 func (b *Builder) InitGearJSON() {
+    // 0. cut long path
+    for hash, path := range b.RegularFiles {
+        var finalPath string
+        pathSlice := strings.SplitAfter(path, "diff")
+        for i := 1; i < len(pathSlice); i++ {
+            finalPath += pathSlice[i]
+        }
+        b.RegularFiles[hash] = finalPath
+    }
+
     // 1. encode regularfiles map[string]string
     json, err := json.Marshal(b.RegularFiles)
     if err != nil {
@@ -361,7 +365,12 @@ func (b *Builder) TarIrregularFiles() {
                 }).Fatal("Fail to get file header...")
         }
         // modify hd's name
-        hd.Name = irFilePath
+        var finalPath string
+        pathSlice := strings.SplitAfter(irFilePath, "diff")
+        for i := 1; i < len(pathSlice); i++ {
+            finalPath += pathSlice[i]
+        }
+        hd.Name = finalPath
         // write file header info
         err = tw.WriteHeader(hd)
         if err != nil {
