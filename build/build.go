@@ -33,7 +33,7 @@ type Builder struct {
     // TmpTarPath string         // $HOME/.gear/tmp/tmp.tar
 
     RegularFiles map[string]string
-    IrregularFiles []string
+    IrregularFiles map[string]os.FileInfo
 
     Dockerfile types.Dockerfile
 }
@@ -124,7 +124,7 @@ func (b *Builder) HasParsedThisImage() bool{
 // and copy irregular file to parsedImages path
 func (b *Builder) WalkThroughLayers(LayerDirs []string) {
     var regularFiles = map[string]string{}
-    var irregularFiles = []string{}
+    var irregularFiles = [string]os.FileInfo{}
 
     // 1. get all files of this image
     for _, path := range LayerDirs {
@@ -151,7 +151,8 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                     regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
                 }else {
                     // record the irregular files
-                    irregularFiles = append(irregularFiles, path)
+                    irregularFiles[path] = irregularFiles
+                    // irregularFiles = append(irregularFiles, path)
                 }
                 return nil
         })
@@ -333,16 +334,9 @@ func (b *Builder) TarIrregularFiles() {
     defer tw.Close()
 
     // 3. write each file to tar
-    for _, irFile := range b.IrregularFiles {
-        // get irfile info
-        fInfo, err := os.Stat(irFile)
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                "err": err,
-                }).Fatal("Fail to stat file...")
-        }
+    for _, irFileInfo := range b.IrregularFiles {
         // get file header info
-        hd, err := tar.FileInfoHeader(fInfo, "")
+        hd, err := tar.FileInfoHeader(irFileInfo, "")
         if err != nil {
             logrus.WithFields(logrus.Fields{
                 "err": err,
