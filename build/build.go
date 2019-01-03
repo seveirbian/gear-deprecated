@@ -19,9 +19,9 @@ import (
 
     "github.com/docker/docker/client"
     dtypes "github.com/docker/docker/api/types"
-    darchive "github.com/docker/docker/pkg/archive"
-    "github.com/docker/docker/pkg/progress"
-    "github.com/docker/docker/pkg/streamformatter"
+    // darchive "github.com/docker/docker/pkg/archive"
+    // "github.com/docker/docker/pkg/progress"
+    // "github.com/docker/docker/pkg/streamformatter"
     // "github.com/docker/docker/api/types/container"
 )
 
@@ -391,28 +391,16 @@ func (b *Builder) BuildGearImage() {
     //     filepath.Join(b.TmpDir, "gear.json"), 
     //     filepath.Join(b.TmpDir, "Dockerfile"), 
     // }
-    // var DockerfileTar = filepath.Join(b.TmpDir, "Dockerfile.tar")
+    var DockerfileTar = filepath.Join(b.TmpDir, "Dockerfile.tar")
     // archive.Archive(files, DockerfileTar)
 
     // 2. open tar
-    // buildTar, err := os.Open(DockerfileTar)
-    // if err != nil {
-    //     logrus.WithFields(logrus.Fields{
-    //             "err": err,
-    //             }).Fatal("Fail to open Dockerfile.tar...")
-    // }
-    buildTar, err := darchive.TarWithOptions(b.TmpDir, &darchive.TarOptions{})
+    buildTar, err := os.Open(DockerfileTar)
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
-                }).Fatal("Fail to create buildTar...")
+                }).Fatal("Fail to open Dockerfile.tar...")
     }
-    defer buildTar.Close()
-
-    var progBuff      io.Writer
-    progressOutput := streamformatter.NewProgressOutput(progBuff)
-    var body io.Reader
-    body = progress.NewProgressReader(buildTar, progressOutput, 0, "", "Sending build context to Docker daemon")
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
@@ -420,7 +408,7 @@ func (b *Builder) BuildGearImage() {
     }
 
     // 4. start to build
-    buildResp, err := b.Client.ImageBuild(b.Ctx, body, opts)
+    buildResp, err := b.Client.ImageBuild(b.Ctx, buildTar, opts)
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
