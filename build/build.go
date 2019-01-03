@@ -419,8 +419,6 @@ func (b *Builder) BuildGearImage() {
                 }).Fatal("Fail to build gear image...")
     }
     defer buildResp.Body.Close()
-
-    io.Copy(os.Stdout, buildResp.Body)
 }
 
 
