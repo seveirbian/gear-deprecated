@@ -20,6 +20,8 @@ import (
     "github.com/docker/docker/client"
     dtypes "github.com/docker/docker/api/types"
     darchive "github.com/docker/docker/pkg/archive"
+    "github.com/docker/docker/pkg/progress"
+    "github.com/docker/docker/pkg/streamformatter"
     // "github.com/docker/docker/api/types/container"
 )
 
@@ -399,12 +401,6 @@ func (b *Builder) BuildGearImage() {
     //             "err": err,
     //             }).Fatal("Fail to open Dockerfile.tar...")
     // }
-    defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
-    cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.22", nil, defaultHeaders)
-    if err != nil {
-        panic(err)
-    }
-
     buildTar, err := darchive.TarWithOptions(b.TmpDir, &darchive.TarOptions{})
     if err != nil {
         logrus.WithFields(logrus.Fields{
@@ -413,13 +409,18 @@ func (b *Builder) BuildGearImage() {
     }
     defer buildTar.Close()
 
+    var progBuff      io.Writer
+    progressOutput := streamformatter.NewProgressOutput(progBuff)
+    var body io.Reader
+    body = progress.NewProgressReader(buildTar, progressOutput, 0, "", "Sending build context to Docker daemon")
+
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
         Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
     }
 
     // 4. start to build
-    buildResp, err := cli.ImageBuild(b.Ctx, buildTar, opts)
+    buildResp, err := b.Client.ImageBuild(b.Ctx, body, opts)
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
