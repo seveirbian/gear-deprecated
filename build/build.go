@@ -10,11 +10,12 @@ import (
     "crypto/sha256"
     "encoding/json"
     "strings"
+    // "bytes"
     "golang.org/x/net/context"
 
     "github.com/seveirbian/gear/types"
     "github.com/seveirbian/gear/pkg/gear"
-    // "github.com/seveirbian/gear/pkg/archive"
+    "github.com/seveirbian/gear/pkg/archive"
     "github.com/sirupsen/logrus"
 
     "github.com/docker/docker/client"
@@ -386,13 +387,13 @@ func (b *Builder) TarIrregularFiles() {
 
 func (b *Builder) BuildGearImage() {
     // 1. create a tarball which contains everthing including Dockerfile
-    // var files = []string {
-    //     filepath.Join(b.TmpDir, "tmp.tar"), 
-    //     filepath.Join(b.TmpDir, "gear.json"), 
-    //     filepath.Join(b.TmpDir, "Dockerfile"), 
-    // }
+    var files = []string {
+        filepath.Join(b.TmpDir, "tmp.tar"), 
+        filepath.Join(b.TmpDir, "gear.json"), 
+        filepath.Join(b.TmpDir, "Dockerfile"), 
+    }
     var DockerfileTar = filepath.Join(b.TmpDir, "Dockerfile.tar")
-    // archive.Archive(files, DockerfileTar)
+    archive.Archive(files, DockerfileTar)
 
     // 2. open tar
     buildTar, err := os.Open(DockerfileTar)
@@ -404,6 +405,7 @@ func (b *Builder) BuildGearImage() {
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
+        Context: buildTar, 
         Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
     }
 
@@ -416,7 +418,7 @@ func (b *Builder) BuildGearImage() {
     }
     defer buildResp.Body.Close()
 
-    fmt.Println(buildResp)
+    io.Copy(os.Stdout, buildResp.Body)
 }
 
 
