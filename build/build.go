@@ -292,11 +292,12 @@ func (b *Builder) InitDockerfile() {
     // tar irregular file to a .tar file and move it to TmpDir
     if b.needTarIrregularFiles() {
         dockerfile = dockerfile + "ADD "
-        dockerfile = dockerfile + "tmp.tar /"
-        dockerfile = dockerfile + "\n"
-        dockerfile = dockerfile + "COPY "
+        dockerfile = dockerfile + "tmp.tar "
         dockerfile = dockerfile + "gear.json /"
         dockerfile = dockerfile + "\n"
+        // dockerfile = dockerfile + "COPY "
+        // dockerfile = dockerfile + "gear.json /"
+        // dockerfile = dockerfile + "\n"
     }
     
 
@@ -405,6 +406,7 @@ func (b *Builder) BuildGearImage() {
 
     // 3. init image build options
     opts := dtypes.ImageBuildOptions{
+        // this field must be filled
         Context: buildTar, 
         Tags: []string{b.DockerImage.Name+"-gear:"+b.DockerImage.Tag, }, 
     }
