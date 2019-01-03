@@ -399,6 +399,12 @@ func (b *Builder) BuildGearImage() {
     //             "err": err,
     //             }).Fatal("Fail to open Dockerfile.tar...")
     // }
+    defaultHeaders := map[string]string{"User-Agent": "engine-api-cli-1.0"}
+    cli, err := client.NewClient("unix:///var/run/docker.sock", "v1.22", nil, defaultHeaders)
+    if err != nil {
+        panic(err)
+    }
+
     buildTar, err := darchive.TarWithOptions(b.TmpDir, &darchive.TarOptions{})
     if err != nil {
         logrus.WithFields(logrus.Fields{
@@ -413,7 +419,7 @@ func (b *Builder) BuildGearImage() {
     }
 
     // 4. start to build
-    buildResp, err := b.Client.ImageBuild(b.Ctx, buildTar, opts)
+    buildResp, err := cli.ImageBuild(b.Ctx, buildTar, opts)
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
