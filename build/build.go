@@ -111,7 +111,7 @@ func (b *Builder) Build() {
 
     // 6. destroy tmp files
     logrus.Info("Cleaning...")
-    // b.Destroy()
+    b.Destroy()
 
 }
 
