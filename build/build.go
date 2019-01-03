@@ -4,7 +4,7 @@ import (
     "fmt"
     "os"
     "io"
-    // "bytes"
+    "bytes"
     "archive/tar"
     "path/filepath"
     "crypto/sha256"
@@ -419,6 +419,10 @@ func (b *Builder) BuildGearImage() {
                 }).Fatal("Fail to build gear image...")
     }
     defer buildResp.Body.Close()
+
+    // this cannot be removed
+    buf := new(bytes.Buffer)
+    io.Copy(buf, buildResp.Body)
 }
 
 
