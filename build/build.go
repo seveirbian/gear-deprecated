@@ -155,7 +155,7 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                                 }).Fatal("Fail to copy file: "+path)
                     }
 
-                    regularFiles[fmt.Sprintf("%x", h.Sum(nil))] = path
+                    regularFiles[path] = fmt.Sprintf("%x", h.Sum(nil))
                 }else {
                     // record the irregular files
                     irregularFiles[path] = f
