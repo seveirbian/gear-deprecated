@@ -40,6 +40,6 @@ class Runner:
 
 if __name__ == "__main__":
     runner = Runner(image="chrislusf/seaweedfs:latest",
-        ports={"9333/tcp":"9333"}, command="server -publicIp=\"$(curl -s cydev.ru/ip)\"", waitline="added volume server")
+        ports={"9333/tcp":"9333"}, command="server", waitline="added volume server")
 
     runner.start()
