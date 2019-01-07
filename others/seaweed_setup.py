@@ -31,7 +31,8 @@ class Runner:
         container.start()
 
         try:
-            print container.logs()
+            while True:
+                print container.logs()
         except KeyboardInterrupt:
             print "removing container..."
             container.remove(force=True)
