@@ -17,6 +17,9 @@ class Runner:
 
 
     def start(self):
+        print "creaing client..."
+        client = docker.from_env()
+
         print "pulling container..."
         image_pulled = client.images.pull(self.image)
 
