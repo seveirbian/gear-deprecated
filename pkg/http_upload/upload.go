@@ -14,6 +14,8 @@ import (
 )
 
 func Upload(file string, url string) error {
+    seaweedUrl := "http://"+url+"/submit"
+
     bodyBuf := &bytes.Buffer{}
     bodyWriter := multipart.NewWriter(bodyBuf)
 
@@ -39,7 +41,7 @@ func Upload(file string, url string) error {
     contentType := bodyWriter.FormDataContentType()
     bodyWriter.Close()
 
-    resp, err := http.Post(url, contentType, bodyBuf)
+    resp, err := http.Post(seaweedUrl, contentType, bodyBuf)
     if err != nil {
         return err
     }
