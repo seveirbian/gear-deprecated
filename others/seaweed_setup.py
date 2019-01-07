@@ -8,11 +8,10 @@ import os
 
 class Runner:
 
-    def __init__(self, image, ports, command, remove, waitline):
+    def __init__(self, image, ports, command, waitline):
         self.image = image
         self.ports = ports
         self.command = command
-        self.remove = remove
         self.waitline = waitline
 
 
@@ -25,7 +24,7 @@ class Runner:
 
         print "creating container..."
         container = client.containers.create(image=self.image, ports=self.ports,
-                                        command=self.command, detach=True, remove=self.remove)
+                                        command=self.command, detach=True)
 
         print "starting container..."
         container.start()
@@ -33,10 +32,14 @@ class Runner:
         while True:
             if container.logs().find(self.waitline) >= 0:
                 break
+        input("Please enter any key to stop this container...")
+        
+        print "removing container..."
+        container.remove(force=True)
 
 
 if __name__ == "__main__":
     runner = Runner(image="chrislusf/seaweedfs:latest",
-        ports={"9333/tcp":"9333"}, command="server", remove=True, waitline="added volume server")
+        ports={"9333/tcp":"9333"}, command="server", waitline="added volume server")
 
     runner.start()
