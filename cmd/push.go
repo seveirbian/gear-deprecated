@@ -3,7 +3,7 @@ package cmd
 import (
     "fmt"
     "github.com/spf13/cobra"
-    "github.com/seveirbian/gear/pkg/image"
+    // "github.com/seveirbian/gear/pkg/image"
     // "github.com/seveirbian/gear/pkg/gear"
 )
 
@@ -23,6 +23,6 @@ var pushCmd = &cobra.Command{
     Short: "push a gear image to seaweedfs",
     Long:  `push a gear image to seaweedfs`,
     Run: func(cmd *cobra.Command, args []string) {
-        
+        fmt.Println("push")
     },
 }
