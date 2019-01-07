@@ -19,7 +19,7 @@ class Runner:
         print "creaing client..."
         client = docker.from_env()
 
-        print "pulling container..."
+        print "pulling image..."
         image_pulled = client.images.pull(self.image)
 
         print "creating container..."
@@ -32,8 +32,8 @@ class Runner:
         while True:
             if container.logs().find(self.waitline) >= 0:
                 break
-        input("Please enter any key to stop this container...")
-        
+        finish = input("Please enter any key to stop this container...")
+
         print "removing container..."
         container.remove(force=True)
 
