@@ -3,7 +3,6 @@ package cmd
 import (
     "fmt"
     "github.com/spf13/cobra"
-    "github.com/seveirbian/gear/push"
     "github.com/seveirbian/gear/pkg/image"
     // "github.com/seveirbian/gear/pkg/gear"
 )
