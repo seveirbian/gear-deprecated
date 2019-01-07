@@ -24,3 +24,24 @@ func Parse(image string) types.Image{
 
     return parsedImage
 }
+
+func ParseGearImage(image string) types.GearImage{
+    tmpImage := Parse(image)
+    parsedImage := types.GearImage{
+        RawID: tmpImage.RawID, 
+        Name: tmpImage.Name, 
+        Tag: tmpImage.Tag, 
+    }
+
+    if strings.HasSuffix(parsedImage.RawID, "-gear") {
+        parsedImage.GearID = parsedImage.RawID
+        parsedImage.RawID = strings.Split(parsedImage.RawID, "-gear")[0]
+        return parsedImage
+    } else {
+        logrus.WithFields(logrus.Fields{
+            "image": parsedImage,
+            }).Fatal("Invalid image...You should use a gear image...")
+    }
+
+    return parsedImage
+}

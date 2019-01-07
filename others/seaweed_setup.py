@@ -32,7 +32,7 @@ class Runner:
         while True:
             if container.logs().find(self.waitline) >= 0:
                 break
-        finish = input("Please enter any key to stop this container...")
+        finish = input("Please enter 'y' to stop this container...")
 
         print "removing container..."
         container.remove(force=True)

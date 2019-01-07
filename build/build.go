@@ -64,11 +64,11 @@ func InitBuilder(image types.Image) *Builder {
     // 3. create tmp dir and others
     tmpDir := filepath.Join(gear.GearRootPath, "tmp")
     err = os.MkdirAll(tmpDir, os.ModePerm)
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                    "err": err,
-                    }).Fatal("Fail to create tmpDir:/home/.gears/tmp.")
-        }
+    if err != nil {
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to create tmpDir:/home/.gears/tmp.")
+    }
 
     return &Builder { 
         DockerImage: image, 

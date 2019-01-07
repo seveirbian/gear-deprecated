@@ -1,10 +1,10 @@
 package cmd
 
 import (
-    "fmt"
+    // "fmt"
     "github.com/spf13/cobra"
-    // "github.com/seveirbian/gear/pkg/image"
-    // "github.com/seveirbian/gear/pkg/gear"
+    "github.com/seveirbian/gear/pkg/image"
+    "github.com/seveirbian/gear/push"
 )
 
 var pushUsage = `Usage:  gear push -i xxx.xxx.xxx.xxx NAME:TAG
@@ -27,6 +27,10 @@ var pushCmd = &cobra.Command{
     Long:  `push a gear image to seaweedfs`,
     Args:  cobra.ExactArgs(1),
     Run: func(cmd *cobra.Command, args []string) {
-        fmt.Println("push")
+        image := image.ParseGearImage(args[0])
+
+        gearImagePusher := push.InitPusher(image, ipAddress)
+
+        gearImagePusher.Push()
     },
 }
