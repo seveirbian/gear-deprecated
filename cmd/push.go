@@ -7,26 +7,22 @@ import (
     // "github.com/seveirbian/gear/pkg/gear"
 )
 
-var dockerImage string
+var pushImage string
+var ipAddress string
 
 func init() {
-    rootCmd.AddCommand(buildCmd)
-    buildCmd.Flags().StringVarP(&dockerImage, "docker-image", "", "", "build a gear image from a standard docker image")
-}   
+    rootCmd.AddCommand(pushCmd)
+    buildCmd.Flags().StringVarP(&pushImage, "docker-image", "", "", "push a gear image from a standard docker image")
+    rootCmd.MarkFlagRequired("docker-image")
+    buildCmd.Flags().StringVarP(&ipAddress, "ip", "", "", "seaweedfs ip address")
+    rootCmd.MarkFlagRequired("ip")
+}
 
-var buildCmd = &cobra.Command{
-    Use:   "build",
-    Short: "build a gear image from a standard docker image",
-    Long:  `build a gear image from a standard docker image`,
+var pushCmd = &cobra.Command{
+    Use:   "push",
+    Short: "push a gear image to seaweedfs",
+    Long:  `push a gear image to seaweedfs`,
     Run: func(cmd *cobra.Command, args []string) {
-        image := image.Parse(dockerImage)
-
-        gearImageBuilder := build.InitBuilder(image)
-
-        if gearImageBuilder.HasParsedThisImage() {
-            fmt.Println("This image has been built.")
-        }else {
-            gearImageBuilder.Build()
-        }
+        
     },
 }
