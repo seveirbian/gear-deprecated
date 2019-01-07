@@ -100,6 +100,7 @@ func (b *Pusher) Push() {
     logrus.Info("Cleaning...")
     b.Destroy()
 
+    fmt.Println("OK!")
 }
 
 // This Func is used to walk through the lowerdirs, calculate regular files' hash 

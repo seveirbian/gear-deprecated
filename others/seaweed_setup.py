@@ -29,10 +29,7 @@ class Runner:
         print "starting container..."
         container.start()
 
-        while True:
-            if container.logs().find(self.waitline) >= 0:
-                break
-        finish = input("Please enter 'y' to stop this container...")
+        print container.logs()
 
         print "removing container..."
         container.remove(force=True)
