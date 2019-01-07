@@ -18,7 +18,7 @@ func init() {
     rootCmd.AddCommand(pushCmd)
     pushCmd.SetUsageTemplate(pushUsage)
     pushCmd.Flags().StringVarP(&ipAddress, "ip", "i", "", "seaweedfs ip address")
-    rootCmd.MarkFlagRequired("ip")
+    pushCmd.MarkFlagRequired("ip")
 }
 
 var pushCmd = &cobra.Command{
