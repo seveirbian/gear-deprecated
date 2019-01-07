@@ -28,9 +28,11 @@ class Runner:
                                         command=self.command)
 
         print "starting container..."
+        container.start()
 
         try:
-            container.start()
+            while True:
+                pass
         except KeyboardInterrupt:
             print "removing container..."
             container.remove(force=True)
