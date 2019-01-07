@@ -160,12 +160,23 @@ func (b *Pusher) PushFiles() {
 // This Func create hardlinks of regular files for pushing
 func (b *Pusher) CreateHardlinks() {
     for path, hash := range b.RegularFiles {
-        err := os.Symlink(path, filepath.Join(b.TmpDir, hash))
-        if err != nil {
-            logrus.WithFields(logrus.Fields{
-                "err": err,
-                }).Fatal("Fail to creating hardlinks...")
+        _, err := os.Stat(filepath.Join(b.TmpDir, hash))
+        if err != nil && os.IsNotExist(err) {
+            err := os.Symlink(path, filepath.Join(b.TmpDir, hash))
+            if err != nil {
+                logrus.WithFields(logrus.Fields{
+                    "err": err,
+                    }).Fatal("Fail to creating hardlinks...")
+            }
+        }else if err != nil && !os.IsNotExist(err) {
+            if err != nil {
+                logrus.WithFields(logrus.Fields{
+                    "err": err,
+                    }).Fatal("Fail to stat files...")
+            }
         }
+        // this file has existed
+        continue
     }
 }
 
