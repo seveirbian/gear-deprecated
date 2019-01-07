@@ -33,9 +33,9 @@ func ParseGearImage(image string) types.GearImage{
         Tag: tmpImage.Tag, 
     }
 
-    if strings.HasSuffix(parsedImage.RawID, "-gear") {
-        parsedImage.GearID = parsedImage.RawID
-        parsedImage.RawID = strings.Split(parsedImage.RawID, "-gear")[0]
+    if strings.HasSuffix(parsedImage.Name, "-gear") {
+        parsedImage.GearID = parsedImage.Name+":"+parsedImage.Tag
+        parsedImage.RawID = strings.Split(parsedImage.Name, "-gear")[0]+":"+parsedImage.Tag
         return parsedImage
     } else {
         logrus.WithFields(logrus.Fields{
