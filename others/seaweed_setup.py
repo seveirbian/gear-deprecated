@@ -5,6 +5,7 @@ import time
 # package need to be installed, pip install pyyaml
 import yaml
 import os
+import signal
 
 class Runner:
 
@@ -29,10 +30,11 @@ class Runner:
         print "starting container..."
         container.start()
 
-        print container.logs()
-
-        print "removing container..."
-        container.remove(force=True)
+        try:
+            print container.logs()
+        except KeyboardInterrupt:
+            print "removing container..."
+            container.remove(force=True)
 
 
 if __name__ == "__main__":
