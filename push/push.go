@@ -89,7 +89,7 @@ func (b *Pusher) Push() {
     b.WalkThroughLayers(layers_path)
 
     // 3. create hard links to regulars
-    logrus.Info("Creating hard links to regular files...")
+    logrus.Info("Creating sym links to regular files...")
     b.CreateHardlinks()
 
     // 4. push regular files to seaweedfs
@@ -159,7 +159,7 @@ func (b *Pusher) PushFiles() {
 // This Func create hardlinks of regular files for pushing
 func (b *Pusher) CreateHardlinks() {
     for path, hash := range b.RegularFiles {
-        err := os.Link(path, filepath.Join(b.TmpDir, hash))
+        err := os.Symlink(path, filepath.Join(b.TmpDir, hash))
         if err != nil {
             logrus.WithFields(logrus.Fields{
                 "err": err,
