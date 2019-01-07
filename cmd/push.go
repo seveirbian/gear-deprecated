@@ -25,6 +25,7 @@ var pushCmd = &cobra.Command{
     Use:   "push",
     Short: "push a gear image to seaweedfs",
     Long:  `push a gear image to seaweedfs`,
+    Args:  cobra.ExactArgs(1),
     Run: func(cmd *cobra.Command, args []string) {
         fmt.Println("push")
     },
