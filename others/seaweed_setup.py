@@ -25,7 +25,7 @@ class Runner:
 
         print "creating container..."
         container = client.containers.create(image=self.image, ports=self.ports,
-                                        command=self.command)
+                                        command=self.command, detach=False)
 
         print "starting container..."
         container.start()
