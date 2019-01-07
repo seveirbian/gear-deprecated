@@ -25,15 +25,12 @@ class Runner:
 
         print "creating container..."
         container = client.containers.create(image=self.image, ports=self.ports,
-                                        command=self.command, detach=True)
+                                        command=self.command)
 
         print "starting container..."
-        container.start()
 
         try:
-            while True:
-                print container.logs()
-                time.sleep(2)
+            container.start()
         except KeyboardInterrupt:
             print "removing container..."
             container.remove(force=True)
