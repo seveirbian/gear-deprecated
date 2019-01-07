@@ -7,14 +7,17 @@ import (
     // "github.com/seveirbian/gear/pkg/gear"
 )
 
-var pushImage string
+var pushUsage = `Usage:  gear push -i xxx.xxx.xxx.xxx NAME:TAG
+Options:
+  -i,  --ip              seaweedfs ip address
+`
+
 var ipAddress string
 
 func init() {
     rootCmd.AddCommand(pushCmd)
-    buildCmd.Flags().StringVarP(&pushImage, "docker-image", "", "", "push a gear image from a standard docker image")
-    rootCmd.MarkFlagRequired("docker-image")
-    buildCmd.Flags().StringVarP(&ipAddress, "ip", "", "", "seaweedfs ip address")
+    pushCmd.SetUsageTemplate(pushUsage)
+    pushCmd.Flags().StringVarP(&ipAddress, "ip", "i", "", "seaweedfs ip address")
     rootCmd.MarkFlagRequired("ip")
 }
 

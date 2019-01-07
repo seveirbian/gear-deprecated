@@ -8,20 +8,20 @@ import (
     // "github.com/seveirbian/gear/pkg/gear"
 )
 
-var buildImage string
+var buildUsage = `Usage:  gear build NAME:TAG`
 
 func init() {
     rootCmd.AddCommand(buildCmd)
-    buildCmd.Flags().StringVarP(&buildImage, "docker-image", "", "", "build a gear image from a standard docker image")
-    rootCmd.MarkFlagRequired("docker-image")
+    buildCmd.SetUsageTemplate(buildUsage)
 }   
 
 var buildCmd = &cobra.Command{
     Use:   "build",
     Short: "build a gear image from a standard docker image",
     Long:  `build a gear image from a standard docker image`,
+    Args:  cobra.ExactArgs(1),
     Run: func(cmd *cobra.Command, args []string) {
-        image := image.Parse(buildImage)
+        image := image.Parse(args[0])
 
         gearImageBuilder := build.InitBuilder(image)
 
