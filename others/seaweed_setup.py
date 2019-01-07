@@ -17,11 +17,14 @@ class Runner:
 
 
     def start(self):
+        print "pulling container..."
         image_pulled = client.images.pull(self.image)
 
+        print "creating container..."
         container = client.containers.create(image=self.image, ports=self.ports,
                                         command=self.command, detach=True, remove=self.remove)
 
+        print "starting container..."
         container.start()
 
         while True:
@@ -32,3 +35,5 @@ class Runner:
 if __name__ == "__main__":
     runner = Runner(image="chrislusf/seaweedfs:latest",
         ports={"9333/tcp":"9333"}, command="server", remove=True, waitline="added volume server")
+
+    runner.start()
