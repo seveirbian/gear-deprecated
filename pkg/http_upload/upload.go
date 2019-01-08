@@ -38,7 +38,6 @@ func Upload(file string, url string) error {
     }
 
     contentType := bodyWriter.FormDataContentType()
-    fmt.Println(contentType)
     bodyWriter.Close()
 
     resp, err := http.Post(url, contentType, bodyBuf)
@@ -50,9 +49,5 @@ func Upload(file string, url string) error {
     if err != nil {
         return err
     }
-    logrus.WithFields(logrus.Fields{
-            "status": resp.Status,
-            "response": string(resp_body), 
-            }).Info("pushed to seaweed...")
     return nil
 }
