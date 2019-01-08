@@ -37,6 +37,7 @@ func Upload(file string, url string) error {
     }
 
     contentType := bodyWriter.FormDataContentType()
+    fmt.Println(contentType)
     bodyWriter.Close()
 
     resp, err := http.Post(url, contentType, bodyBuf)
