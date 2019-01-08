@@ -8,9 +8,9 @@ import (
     "os"
     "io"
     "net/http"
-    "io/ioutil"
+    // "io/ioutil"
 
-    // "github.com/sirupsen/logrus"
+    "github.com/sirupsen/logrus"
 
 )
 
@@ -45,9 +45,14 @@ func Upload(file string, url string) error {
         return err
     }
     defer resp.Body.Close()
-    resp_body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return err
+    // resp_body, err := ioutil.ReadAll(resp.Body)
+    // if err != nil {
+    //     return err
+    // }
+    if resp.StatusCode != 200 {
+        logrus.WithFields(logrus.Fields{
+                "status": resp.Status,
+                }).Info("Fail to push file...")
     }
     return nil
 }
