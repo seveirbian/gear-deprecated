@@ -10,7 +10,7 @@ import (
     "net/http"
     "io/ioutil"
 
-    "github.com/sirupsen/logrus"
+    // "github.com/sirupsen/logrus"
 
 )
 
