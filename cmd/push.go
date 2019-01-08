@@ -7,29 +7,29 @@ import (
     "github.com/seveirbian/gear/push"
 )
 
-var pushUsage = `Usage:  gear push -i xxx.xxx.xxx.xxx NAME:TAG
+var pushUsage = `Usage:  gear push --target-url http://xxx.xxx.xxx.xxx:xxx/... NAME:TAG
 Options:
-  -i,  --ip              seaweedfs ip address
+  --target-url              server url address
 `
 
-var ipAddress string
+var targetUrl string
 
 func init() {
     rootCmd.AddCommand(pushCmd)
     pushCmd.SetUsageTemplate(pushUsage)
-    pushCmd.Flags().StringVarP(&ipAddress, "ip", "i", "", "seaweedfs ip address")
-    pushCmd.MarkFlagRequired("ip")
+    pushCmd.Flags().StringVarP(&targetUrl, "target-url", "", "", "server url address")
+    pushCmd.MarkFlagRequired("target-url")
 }
 
 var pushCmd = &cobra.Command{
     Use:   "push",
-    Short: "push a gear image to seaweedfs",
-    Long:  `push a gear image to seaweedfs`,
+    Short: "push a gear image to server",
+    Long:  `push a gear image to server`,
     Args:  cobra.ExactArgs(1),
     Run: func(cmd *cobra.Command, args []string) {
         image := image.ParseGearImage(args[0])
 
-        gearImagePusher := push.InitPusher(image, ipAddress)
+        gearImagePusher := push.InitPusher(image, targetUrl)
 
         gearImagePusher.Push()
     },

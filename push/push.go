@@ -30,10 +30,10 @@ type Pusher struct {
 
     RegularFiles map[string]string
 
-    Ip string
+    TargetUrl string
 }
 
-func InitPusher(image types.GearImage, ip string) *Pusher {
+func InitPusher(image types.GearImage, url string) *Pusher {
     // 1. create client to interact with docker daemon
     ctx := context.Background()
     cli, err := client.NewClientWithOpts(client.WithVersion("1.38"))
@@ -67,7 +67,7 @@ func InitPusher(image types.GearImage, ip string) *Pusher {
         DockerImageInfo: imageInspect, 
         GearRootPath: gear.GearRootPath, 
         TmpDir: tmpDir, 
-        Ip: ip, 
+        TargetUrl: url, 
     }
 }
 
@@ -90,7 +90,7 @@ func (b *Pusher) Push() {
 
     // 3. create hard links to regulars
     logrus.Info("Creating sym links to regular files...")
-    b.CreateHardlinks()
+    b.CreateLinks()
 
     // 4. push regular files to seaweedfs
     logrus.Info("Pushing...")
@@ -153,12 +153,12 @@ func (b *Pusher) WalkThroughLayers(LayerDirs []string) {
 // This Func push files to seaweed
 func (b *Pusher) PushFiles() {
     for _, hash := range b.RegularFiles {
-        http_upload.Upload(filepath.Join(b.TmpDir, hash), b.Ip)
+        http_upload.Upload(filepath.Join(b.TmpDir, hash), b.TargetUrl)
     }
 }
 
 // This Func create hardlinks of regular files for pushing
-func (b *Pusher) CreateHardlinks() {
+func (b *Pusher) CreateLinks() {
     for path, hash := range b.RegularFiles {
         _, err := os.Stat(filepath.Join(b.TmpDir, hash))
         if err != nil && os.IsNotExist(err) {
