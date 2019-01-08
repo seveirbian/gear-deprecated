@@ -3,6 +3,7 @@ package http_upload
 import (
     "fmt"
     "bytes"
+    "path/filepath"
     "mime/multipart"
     "os"
     "io"
@@ -17,7 +18,7 @@ func Upload(file string, url string) error {
     bodyBuf := &bytes.Buffer{}
     bodyWriter := multipart.NewWriter(bodyBuf)
 
-    fileWriter, err := bodyWriter.CreateFormFile("file", file)
+    fileWriter, err := bodyWriter.CreateFormFile("file", filepath.Base(file))
     if err != nil {
         fmt.Println("error writing to buffer")
         return err

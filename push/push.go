@@ -89,10 +89,10 @@ func (b *Pusher) Push() {
     b.WalkThroughLayers(layers_path)
 
     // 3. create hard links to regulars
-    logrus.Info("Creating sym links to regular files...")
-    b.CreateLinks()
+    // logrus.Info("Creating sym links to regular files...")
+    // b.CreateLinks()
 
-    // 4. push regular files to seaweedfs
+    // 4. push regular files to server
     logrus.Info("Pushing...")
     b.PushFiles()
 
@@ -157,28 +157,28 @@ func (b *Pusher) PushFiles() {
     }
 }
 
-// This Func create hardlinks of regular files for pushing
-func (b *Pusher) CreateLinks() {
-    for path, hash := range b.RegularFiles {
-        _, err := os.Stat(filepath.Join(b.TmpDir, hash))
-        if err != nil && os.IsNotExist(err) {
-            err := os.Symlink(path, filepath.Join(b.TmpDir, hash))
-            if err != nil {
-                logrus.WithFields(logrus.Fields{
-                    "err": err,
-                    }).Fatal("Fail to creating hardlinks...")
-            }
-        }else if err != nil && !os.IsNotExist(err) {
-            if err != nil {
-                logrus.WithFields(logrus.Fields{
-                    "err": err,
-                    }).Fatal("Fail to stat files...")
-            }
-        }
-        // this file has existed
-        continue
-    }
-}
+// // This Func create hardlinks of regular files for pushing
+// func (b *Pusher) CreateLinks() {
+//     for path, hash := range b.RegularFiles {
+//         _, err := os.Stat(filepath.Join(b.TmpDir, hash))
+//         if err != nil && os.IsNotExist(err) {
+//             err := os.Symlink(path, filepath.Join(b.TmpDir, hash))
+//             if err != nil {
+//                 logrus.WithFields(logrus.Fields{
+//                     "err": err,
+//                     }).Fatal("Fail to creating hardlinks...")
+//             }
+//         }else if err != nil && !os.IsNotExist(err) {
+//             if err != nil {
+//                 logrus.WithFields(logrus.Fields{
+//                     "err": err,
+//                     }).Fatal("Fail to stat files...")
+//             }
+//         }
+//         // this file has existed
+//         continue
+//     }
+// }
 
 // This Func remove all files under tmpDir
 func (b *Pusher) Destroy() {
