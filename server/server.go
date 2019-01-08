@@ -55,7 +55,12 @@ func (s *Server) InitRoute() {
 }
 
 func (s *Server) Start() {
-    s.Server.Start(s.Ip+":"+s.Port)
+    err := s.Server.Start(s.Ip+":"+s.Port)
+    if err != nil{
+        logrus.WithFields(logrus.Fields{
+                "err": err,
+                }).Fatal("Fail to start server")
+    }
 }
 
 
