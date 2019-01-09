@@ -4,21 +4,21 @@ import (
     // "fmt"
     "github.com/spf13/cobra"
     "github.com/seveirbian/gear/pkg/image"
-    "github.com/seveirbian/gear/push"
+    "github.com/seveirbian/gear/core/push"
 )
 
-var pushUsage = `Usage:  gear push --target-url http://xxx.xxx.xxx.xxx:xxx/... NAME:TAG
+var pushUsage = `Usage:  gear push --push-url http://xxx.xxx.xxx.xxx:xxx/... NAME:TAG
 Options:
-  --target-url              server url address
+  --push-url              server url address
 `
 
-var targetUrl string
+var pushURL string
 
 func init() {
     rootCmd.AddCommand(pushCmd)
     pushCmd.SetUsageTemplate(pushUsage)
-    pushCmd.Flags().StringVarP(&targetUrl, "target-url", "", "", "server url address")
-    pushCmd.MarkFlagRequired("target-url")
+    pushCmd.Flags().StringVarP(&pushURL, "push-url", "", "", "server url address")
+    pushCmd.MarkFlagRequired("push-url")
 }
 
 var pushCmd = &cobra.Command{
@@ -29,7 +29,7 @@ var pushCmd = &cobra.Command{
     Run: func(cmd *cobra.Command, args []string) {
         image := image.ParseGearImage(args[0])
 
-        gearImagePusher := push.InitPusher(image, targetUrl)
+        gearImagePusher := push.InitPusher(image, pushURL)
 
         gearImagePusher.Push()
     },

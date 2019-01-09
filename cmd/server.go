@@ -3,13 +3,14 @@ package cmd
 import (
     // "fmt"
     "github.com/spf13/cobra"
-    "github.com/seveirbian/gear/server"
+    "github.com/seveirbian/gear/core/server"
 )
 
 var serverIp string
 var serverPort string
 
-var serverUsage = `Usage:  gear server --server-ip IPADDRESS --server-port PORT`
+var serverUsage = `Usage:  gear server --server-ip IPADDRESS --server-port PORT
+`
 
 func init() {
     rootCmd.AddCommand(serverCmd)
