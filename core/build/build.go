@@ -176,17 +176,18 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 
 func (b *Builder) InitGearJSON() {
     // 0. cut long path
-    for hash, path := range b.RegularFiles {
+    gearJSON := map[string]string{}
+    for path, hash := range b.RegularFiles {
         var finalPath string
         pathSlice := strings.SplitAfter(path, "diff")
         for i := 1; i < len(pathSlice); i++ {
             finalPath += pathSlice[i]
         }
-        b.RegularFiles[hash] = finalPath
+        gearJSON[finalPath] = hash
     }
 
     // 1. encode regularfiles map[string]string
-    json, err := json.Marshal(b.RegularFiles)
+    json, err := json.Marshal(gearJSON)
     if err != nil {
         logrus.WithFields(logrus.Fields{
                 "err": err,
