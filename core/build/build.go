@@ -37,7 +37,7 @@ type Builder struct {
     TmpDir string             // $HOME/.gear/tmp/
     // TmpTarPath string         // $HOME/.gear/tmp/tmp.tar
 
-    RegularFiles map[string]string
+    RegularFiles map[string]types.ExtendFileInfo
     IrregularFiles map[string]os.FileInfo
 
     Dockerfile types.Dockerfile
@@ -129,7 +129,7 @@ func (b *Builder) HasParsedThisImage() bool{
 // This Func is used to walk through the lowerdirs, calculate regular files' hash 
 // and copy irregular file to parsedImages path
 func (b *Builder) WalkThroughLayers(LayerDirs []string) {
-    var regularFiles = map[string]string{}
+    var regularFiles = map[string]types.ExtendFileInfo{}
     var irregularFiles = map[string]os.FileInfo{}
 
     // 1. get all files of this image
@@ -141,23 +141,30 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
                 // 2. hash each regular file and record other files
                 // if this file is a regular file, hash it
                 if f.Mode().IsRegular() {
-                    f, err := os.Open(path)
+                    file, err := os.Open(path)
                     if err != nil {
                         logrus.WithFields(logrus.Fields{
                                 "err": err,
                                 }).Fatal("Fail to open file: "+path)
                     }
-                    defer f.Close()
+                    defer file.Close()
                     h := sha256.New()
-                    if _, err := io.Copy(h, f); err != nil {
+                    if _, err := io.Copy(h, file); err != nil {
                         logrus.WithFields(logrus.Fields{
                                 "err": err,
                                 }).Fatal("Fail to copy file: "+path)
                     }
 
-                    regularFiles[path] = fmt.Sprintf("%x", h.Sum(nil))
+                    regularFiles[path] = types.ExtendFileInfo{
+                        Hash: fmt.Sprintf("%x", h.Sum(nil)), 
+                        FileInfo: f, 
+                    }
                 }else {
                     // record the irregular files
+                    regularFiles[path] = types.ExtendFileInfo{
+                        Hash: "", 
+                        FileInfo: f, 
+                    }
                     irregularFiles[path] = f
                 }
                 return nil
@@ -176,7 +183,7 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 
 func (b *Builder) InitGearJSON() {
     // 0. cut long path
-    gearJSON := map[string]string{}
+    gearJSON := map[string]types.ExtendFileInfo{}
     for path, hash := range b.RegularFiles {
         var finalPath string
         pathSlice := strings.SplitAfter(path, "diff")
