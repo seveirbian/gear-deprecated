@@ -4,6 +4,7 @@ import (
     "io/ioutil"
     "path/filepath"
     "encoding/json"
+    "os/signal"
 
     "bazil.org/fuse"
     "bazil.org/fuse/fs"
@@ -13,7 +14,7 @@ import (
 )
 
 func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
-    var gearJson map[string]types.ExtendFileInfo
+    var gearJson = map[string]types.ExtendFileInfo{}
 
     // 1. read gear.json file
     data, err := ioutil.ReadFile(filepath.Join(lowerDir, "gear.json"))
@@ -46,8 +47,17 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
     }
     defer c.Close()
 
-    // 4. create fs struct
-    fileSystem := types.FS {
+    // 4. create signal channel
+    sigs := make(chan os.Signal, 1)
+    signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+    go func() {
+        sig := <-sigs
+        c.Close()
+        os.Exit(1)
+    }()
+
+    // 5. create fs struct
+    fileSystem := &types.FS {
         Files: gearJson, 
         LowerDir: lowerDir, 
         UpperDir: upperDir, 
@@ -57,7 +67,7 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
     }
 
     // 5. use fs to serving fs requests
-    err = fs.Serve(c, &fileSystem)
+    err = fs.Serve(c, fileSystem)
     if err != nil {
         if err != nil {
             logrus.WithFields(logrus.Fields{
@@ -75,6 +85,8 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
                 }).Fatal("Have something to report...")
         }
     }
+
+    fmt.Println("fs started...")
 }
 
 
