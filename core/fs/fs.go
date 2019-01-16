@@ -1,4 +1,4 @@
-package nonCooperativeFs
+package fs
 
 import (
     "io/ioutil"

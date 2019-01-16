@@ -5,36 +5,36 @@ import (
     "strings"
 
     "github.com/spf13/cobra"
-    "github.com/seveirbian/gear/core/nonCooperativeFs"
+    "github.com/seveirbian/gear/core/fs"
     // "github.com/seveirbian/gear/pkg/image"
     // // "github.com/seveirbian/gear/pkg/gear"
     // "github.com/docker/go-plugins-helpers/graphdriver"
 )
 
-var nonCooperativeFsOptions string
+var fsOptions string
 
-var noCoopFsUsage = `Usage:  gear non-cooperative-fs -o lowerdir=...,upperdir=...,workdir=... merged
+var fsUsage = `Usage:  gear fs -o lowerdir=...,upperdir=...,workdir=... merged
 Central-fs will create a fs that does not cooperate with other fs
-  --non-cooperative-fs-options   -o              lowerdir, upperdir and workdir
+  --fsOptions   -o              lowerdir, upperdir and workdir
 `
 
 func init() {
-    rootCmd.AddCommand(noCoopFsCmd)
-    noCoopFsCmd.SetUsageTemplate(noCoopFsUsage)
-    noCoopFsCmd.Flags().StringVarP(&nonCooperativeFsOptions, "nonCooperativeFsOptions", "o", "", "lowerdir, upperdir and workdir")
-    noCoopFsCmd.MarkFlagRequired("nonCooperativeFsOptions")
+    rootCmd.AddCommand(fsCmd)
+    fsCmd.SetUsageTemplate(fsUsage)
+    fsCmd.Flags().StringVarP(&fsOptions, "fsOptions", "o", "", "lowerdir, upperdir and workdir")
+    fsCmd.MarkFlagRequired("fsOptions")
 }   
 
-var noCoopFsCmd = &cobra.Command{
-    Use:   "non-cooperative-fs",
-    Short: "create a gear fs that does not cooperate with other fs",
-    Long:  `create a gear fs that does not cooperate with other fs`,
+var fsCmd = &cobra.Command{
+    Use:   "fs",
+    Short: "create a gear fs",
+    Long:  `create a gear fs`,
     Args:  cobra.ExactArgs(1),
     Run: func(cmd *cobra.Command, args []string) {
         mergedDir := args[0]
-        lowerDir, upperDir, workDir, publicDir := parseArgs(nonCooperativeFsOptions)
+        lowerDir, upperDir, workDir, publicDir := parseArgs(fsOptions)
         
-        nonCooperativeFs.Mount(lowerDir, upperDir, workDir, mergedDir, publicDir)
+        fs.Mount(lowerDir, upperDir, workDir, mergedDir, publicDir)
     },
 }
 
