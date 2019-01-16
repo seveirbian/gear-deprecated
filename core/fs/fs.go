@@ -39,6 +39,8 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
         }
     }
 
+    fmt.Println(gearJson)
+
     // 3. mount to mergedDir
     c, err := fuse.Mount(mergedDir)
     if err != nil {
@@ -49,6 +51,8 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
         }
     }
     defer c.Close()
+
+    fmt.Println("Mount OK")
 
     // 4. create signal channel
     sigs := make(chan os.Signal, 1)
