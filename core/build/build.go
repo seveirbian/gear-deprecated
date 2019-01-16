@@ -157,13 +157,21 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 
                     regularFiles[path] = types.ExtendFileInfo{
                         Hash: fmt.Sprintf("%x", h.Sum(nil)), 
-                        FileInfo: f, 
+                        Name: f.Name(), 
+                        Size: f.Size(), 
+                        Mode: f.Mode(), 
+                        ModTime: f.ModTime(), 
+                        IsDir: f.IsDir(), 
                     }
                 }else {
                     // record the irregular files
                     regularFiles[path] = types.ExtendFileInfo{
                         Hash: "", 
-                        FileInfo: f, 
+                        Name: f.Name(), 
+                        Size: f.Size(), 
+                        Mode: f.Mode(), 
+                        ModTime: f.ModTime(), 
+                        IsDir: f.IsDir(), 
                     }
                     irregularFiles[path] = f
                 }
@@ -184,13 +192,13 @@ func (b *Builder) WalkThroughLayers(LayerDirs []string) {
 func (b *Builder) InitGearJSON() {
     // 0. cut long path
     gearJSON := map[string]types.ExtendFileInfo{}
-    for path, hash := range b.RegularFiles {
+    for path, fileInfo := range b.RegularFiles {
         var finalPath string
         pathSlice := strings.SplitAfter(path, "diff")
         for i := 1; i < len(pathSlice); i++ {
             finalPath += pathSlice[i]
         }
-        gearJSON[finalPath] = hash
+        gearJSON[finalPath] = fileInfo
     }
 
     // 1. encode regularfiles map[string]string

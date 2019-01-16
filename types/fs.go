@@ -3,6 +3,7 @@ package types
 import (
     "os"
     "fmt"
+    "time"
 
     "bazil.org/fuse"
     "bazil.org/fuse/fs"
@@ -12,7 +13,11 @@ import (
 
 type ExtendFileInfo struct {
     Hash string
-    FileInfo os.FileInfo
+    Name string // file name
+    Size int64 // file size
+    Mode os.FileMode
+    ModTime time.Time // modification time
+    IsDir bool // whether this file is a dir
 }
 
 type FS struct {
@@ -79,11 +84,11 @@ func (d *Dir) Attr(c context.Context, a *fuse.Attr) error {
 
 func dirAttr(e ExtendFileInfo) *fuse.Attr {
     return &fuse.Attr{
-        Size:   uint64(e.FileInfo.Size()),
-        Mode:   e.FileInfo.Mode(),
-        Mtime:  e.FileInfo.ModTime(),
-        Ctime:  e.FileInfo.ModTime(),
-        Crtime: e.FileInfo.ModTime(),
+        Size:   uint64(e.Size),
+        Mode:   e.Mode,
+        Mtime:  e.ModTime,
+        Ctime:  e.ModTime,
+        Crtime: e.ModTime,
     }
 }
 
