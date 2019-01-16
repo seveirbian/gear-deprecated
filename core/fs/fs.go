@@ -1,6 +1,9 @@
 package fs
 
 import (
+    "os"
+    "fmt"
+    "syscall"
     "io/ioutil"
     "path/filepath"
     "encoding/json"
@@ -51,7 +54,7 @@ func Mount(lowerDir, upperDir, workDir, mergedDir, publicDir string) {
     sigs := make(chan os.Signal, 1)
     signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
     go func() {
-        sig := <-sigs
+        <-sigs
         c.Close()
         os.Exit(1)
     }()
